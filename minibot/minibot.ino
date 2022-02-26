@@ -10,33 +10,33 @@
 #include <AccelStepper.h>
 // http://www.airspayce.com/mikem/arduino/AccelStepper/classAccelStepper.html
 
+// UPD client:
 // nc -u 192.168.2.164 4210
 #define UDP_PORT          4210
 
-#define CMD_GOTO          1 // 4 1 33 44
-#define CMD_STOP          2 // 2 2
+#define CMD_GOTO          1 // 1 33 44
+#define CMD_STOP          2 // 2
 #define CMD_MODE          3
-#define CMD_SET           4 // 5 4 2 400 400
-#define CMD_GET           5 // 3 5 4
-#define CMD_EE_READ       6 // 3 6 0
-#define CMD_EE_WRITE      7 // 4 7 0 55
+#define CMD_SET           4 // 4 2 400 400
+#define CMD_GET           5 // 5 4
+#define CMD_EE_READ       6 // 6 0
+#define CMD_EE_WRITE      7 // 7 0 55
 
 #define CMD_SUB_SPEED     1
 #define CMD_SUB_MAX_SPEED 2
 #define CMD_SUB_ACCEL     3
 #define CMD_SUB_POS       4
 
-#define POS_LEN           0
-#define POS_COMMAND       1
-#define POS_SUB_COMMAND   2
+#define POS_COMMAND       0
+#define POS_SUB_COMMAND   1
 
-#define POS_MODE          2
-#define POS_TARGET_LEFT   2
-#define POS_TARGET_RIGHT  3
-#define POS_SET_PARAM_L   3
-#define POS_SET_PARAM_R   4
-#define POS_EE_ADR        2
-#define POS_EE_VAL        3
+#define POS_MODE          1
+#define POS_TARGET_LEFT   1
+#define POS_TARGET_RIGHT  2
+#define POS_SET_PARAM_L   2
+#define POS_SET_PARAM_R   3
+#define POS_EE_ADR        1
+#define POS_EE_VAL        2
 
 #define MODE_STB          0
 #define MODE_START        1
@@ -140,6 +140,7 @@ void loop() {
 }
 
 void runCommand(){
+  int stepL, stepR;
   
   if(mode == MODE_START){
     stepperR.move(targetRight);
@@ -148,8 +149,10 @@ void runCommand(){
     mode = MODE_RUN;
   }
   else if(mode == MODE_RUN){
-    if(stepperR.run() == false) mode = MODE_STOP;
-    if(stepperL.run() == false) mode = MODE_STOP;
+    stepL = stepperL.run();
+    stepR = stepperR.run();
+    
+    if((stepL == false) and (stepR == false)) mode = MODE_STOP;
   }
   else if(mode == MODE_STOP){
     stepperR.stop();
@@ -184,15 +187,13 @@ void receiveUDPFrame(){
       i++;
     }
     frame.length = i;
-
-    sendUDP(response, 3);
   }
 }
 
 void decodeCommand(){
   // If a new frame was received
   if(frame.newCommand == 1){
-    Serial.println("New command received");
+    //Serial.println("New command received");
     //Serial.println("Frame length ok.");
     // Handle data in frame depending on command
     if(frame.data[POS_COMMAND] == CMD_GOTO){
@@ -200,20 +201,24 @@ void decodeCommand(){
       targetLeft = frame.data[POS_TARGET_LEFT];
       targetRight = frame.data[POS_TARGET_RIGHT];
       mode = MODE_START;
+      sendUDP("ok\n");
     }
     else if(frame.data[POS_COMMAND] == CMD_STOP){
       Serial.println("Stop");
       mode = MODE_STOP;
+      sendUDP("ok\n");
     }
     else if(frame.data[POS_COMMAND] == CMD_MODE){
       Serial.print("MODE: ");
       Serial.println(frame.data[POS_MODE]);
       mode = frame.data[POS_MODE];
+      sendUDP("ok\n");
     }
     else if(frame.data[POS_COMMAND] == CMD_EE_READ){
       Serial.print("EEPROM value: ");
       EEPROM.get(frame.data[POS_EE_ADR], eepromdata);
       Serial.println(eepromdata.val);
+      sendUDP("ok\n");
     }
     else if(frame.data[POS_COMMAND] == CMD_EE_WRITE){
       Serial.print("Writing EEPROM value: ");
@@ -224,30 +229,33 @@ void decodeCommand(){
       EEPROM.put(frame.data[POS_EE_ADR], eepromdata);
       EEPROM.commit();    //Store data to EEPROM
       delay(100);
+      sendUDP("ok\n");
     }
     else if(frame.data[POS_COMMAND] == CMD_SET){
       if(frame.data[POS_SUB_COMMAND] == CMD_SUB_SPEED){
         Serial.print("set speed");
         stepperL.setSpeed(frame.data[POS_SET_PARAM_L]);
         stepperR.setSpeed(frame.data[POS_SET_PARAM_R]);
+        sendUDP("ok\n");
       }
       else if(frame.data[POS_SUB_COMMAND] == CMD_SUB_MAX_SPEED){
         Serial.print("set max speed");
         stepperL.setMaxSpeed(frame.data[POS_SET_PARAM_L]);
         stepperR.setMaxSpeed(frame.data[POS_SET_PARAM_R]);
+        sendUDP("ok\n");
       }
       else if(frame.data[POS_SUB_COMMAND] == CMD_SUB_ACCEL){
         Serial.print("set acceleration");
         stepperL.setAcceleration(frame.data[POS_SET_PARAM_L]);
         stepperR.setAcceleration(frame.data[POS_SET_PARAM_R]);
+        sendUDP("ok\n");
       }        
     }
     else if(frame.data[POS_COMMAND] == CMD_GET){
-      if(frame.data[POS_SUB_COMMAND] == CMD_SUB_SPEED){
-        Serial.print("Get positions: PosL="); 
-        Serial.print(stepperL.currentPosition());
-        Serial.print(" PosR=");
-        Serial.println(stepperR.currentPosition());
+      if(frame.data[POS_SUB_COMMAND] == CMD_SUB_POS){
+        sprintf(response, "Get positions: PosL=%d PosR=%d\n", stepperL.currentPosition(), stepperR.currentPosition());
+        Serial.println(response);
+        sendUDP(response);
       }
     }
   }
@@ -272,17 +280,10 @@ void receiveSerialFrame(){
   }
 }
 
-void sendUDP(char * buffer, int len){
+void sendUDP(char * buffer){
   // Send return packet
   UDP.beginPacket(UDP.remoteIP(), UDP.remotePort());
-  UDP.write((uint8_t*)buffer, len);
+  UDP.write((uint8_t*)buffer, strlen(buffer));
   UDP.endPacket();
   Serial.print("UDP: "); Serial.println(buffer);
-}
-
-void telemetry(){
-  Serial.print("INFO: PosL="); 
-  Serial.print(stepperL.currentPosition());
-  Serial.print(" PosR=");
-  Serial.println(stepperR.currentPosition());
 }
