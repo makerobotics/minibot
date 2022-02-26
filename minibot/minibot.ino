@@ -31,8 +31,8 @@
 #define POS_MODE          2
 #define POS_TARGET_LEFT   2
 #define POS_TARGET_RIGHT  3
-#define POS_SET_SPEED_L   3
-#define POS_SET_SPEED_R   4
+#define POS_SET_PARAM_L   3
+#define POS_SET_PARAM_R   4
 #define POS_EE_ADR        2
 #define POS_EE_VAL        3
 
@@ -183,13 +183,6 @@ void receiveUDPFrame(){
     }
     frame.length = i;
 
-    // Print frame for debug
-    /*Serial.print("Frame: ");
-    for(int i=0;i<frame.data[0];i++){
-      Serial.print(frame.data[i]);Serial.print(" ");  
-    }
-    Serial.println();*/
-
     sendUDP(response, 3);
   }
 }
@@ -232,9 +225,19 @@ void decodeCommand(){
     }
     else if(frame.data[POS_COMMAND] == CMD_SET){
       if(frame.data[POS_SUB_COMMAND] == CMD_SUB_SPEED){
-        Serial.print("setSpeed");
-        stepperL.setSpeed(frame.data[POS_SET_SPEED_L]);
-        stepperR.setSpeed(frame.data[POS_SET_SPEED_R]);
+        Serial.print("set speed");
+        stepperL.setSpeed(frame.data[POS_SET_PARAM_L]);
+        stepperR.setSpeed(frame.data[POS_SET_PARAM_R]);
+      }
+      else if(frame.data[POS_SUB_COMMAND] == CMD_SUB_MAX_SPEED){
+        Serial.print("set max speed");
+        stepperL.setMaxSpeed(frame.data[POS_SET_PARAM_L]);
+        stepperR.setMaxSpeed(frame.data[POS_SET_PARAM_R]);
+      }
+      else if(frame.data[POS_SUB_COMMAND] == CMD_SUB_ACCEL){
+        Serial.print("set acceleration");
+        stepperL.setAcceleration(frame.data[POS_SET_PARAM_L]);
+        stepperR.setAcceleration(frame.data[POS_SET_PARAM_R]);
       }        
     }
   }
@@ -253,11 +256,6 @@ void receiveSerialFrame(){
     
     // look for the newline. That's the end of your sentence:
     if (Serial.read() == '\r') {
-      /*Serial.print("Frame: ");
-      for(int i=0;i<commands[0];i++){
-        Serial.print(commands[i]);Serial.print(" ");  
-      }
-      Serial.println();*/
       frame.newCommand = 1;
       frame.length = 0;
     }
