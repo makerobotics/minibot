@@ -16,13 +16,15 @@
 #define CMD_GOTO          1 // 4 1 33 44
 #define CMD_STOP          2 // 2 2
 #define CMD_MODE          3
-#define CMD_SET           4
-#define CMD_EE_READ       5 // 3 5 0
-#define CMD_EE_WRITE      6 // 4 6 0 55
+#define CMD_SET           4 // 5 4 2 400 400
+#define CMD_GET           5 // 3 5 4
+#define CMD_EE_READ       6 // 3 6 0
+#define CMD_EE_WRITE      7 // 4 7 0 55
 
 #define CMD_SUB_SPEED     1
 #define CMD_SUB_MAX_SPEED 2
 #define CMD_SUB_ACCEL     3
+#define CMD_SUB_POS       4
 
 #define POS_LEN           0
 #define POS_COMMAND       1
@@ -240,6 +242,14 @@ void decodeCommand(){
         stepperR.setAcceleration(frame.data[POS_SET_PARAM_R]);
       }        
     }
+    else if(frame.data[POS_COMMAND] == CMD_GET){
+      if(frame.data[POS_SUB_COMMAND] == CMD_SUB_SPEED){
+        Serial.print("Get positions: PosL="); 
+        Serial.print(stepperL.currentPosition());
+        Serial.print(" PosR=");
+        Serial.println(stepperR.currentPosition());
+      }
+    }
   }
   // reset new command flag
   frame.newCommand = 0;
@@ -268,4 +278,11 @@ void sendUDP(char * buffer, int len){
   UDP.write((uint8_t*)buffer, len);
   UDP.endPacket();
   Serial.print("UDP: "); Serial.println(buffer);
+}
+
+void telemetry(){
+  Serial.print("INFO: PosL="); 
+  Serial.print(stepperL.currentPosition());
+  Serial.print(" PosR=");
+  Serial.println(stepperR.currentPosition());
 }
