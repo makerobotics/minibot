@@ -35,7 +35,7 @@ Steps per deg: 8127/360 = 22,575 /deg
 #define SPEED_SOUND       340 // m/s
 #define SENSOR_MAX_RANGE  1000 // mm (sensor can about 3-4m)
 
-#define INIT_MAX_SPEED    5000
+#define INIT_MAX_SPEED    1500 // max
 #define INIT_ACCEL        600
 
 #define CMD_GOTO          1 // 1 33 44
