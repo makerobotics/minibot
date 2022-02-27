@@ -14,16 +14,14 @@ while(1) :
     try:
         msg = input('Enter command : ')
         frame = msg.split()
+        # turn angle in deg
         if("turn" in frame[0]):
             msg = "1 "+str(round(float(frame[1])*22.575))+" "+str(round(float(frame[1])*(-22.575)))
             print(msg)
-            #sys.exit()
+        # move distance in cm
         if("move" in frame[0]):
             msg = "1 "+str(round(float(frame[1])*21.558*10))+" "+str(round(float(frame[1])*(21.558*10)))
             print(msg)
-            #sys.exit() 
-         
-        
         try :
             #Set the whole string
             s.sendto(msg.encode(), (host, port))
