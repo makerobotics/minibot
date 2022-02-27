@@ -6,6 +6,22 @@
 #include <EEPROM.h>
 #include "secret.h"
 
+/*
+PROPERTIES
+----------
+Steps per revolution: 32
+Gear: 64:1 (roundabout)
+Step control: half step
+Wheel steps per revolution: 32*64*2 = 4096
+Wheel circumference: 19 cm
+Wheel axle distance: 12 cm
+Steps per mm: 4096/190 = 21,558 /mm
+
+Full turn distance: pi*D=37,7 cm
+Full turn steps: 8127
+Steps per deg: 8127/360 = 22,575 /deg
+*/
+
 // Include the AccelStepper library:
 #include <AccelStepper.h>
 // http://www.airspayce.com/mikem/arduino/AccelStepper/classAccelStepper.html
@@ -14,6 +30,14 @@
 // nc -u 192.168.2.164 4210
 #define UDP_PORT          4210
 
+#define TRIGGER_PIN       15
+#define ECHO_PIN          13
+#define SPEED_SOUND       340 // m/s
+#define SENSOR_MAX_RANGE  1000 // mm (sensor can about 3-4m)
+
+#define INIT_MAX_SPEED    5000
+#define INIT_ACCEL        600
+
 #define CMD_GOTO          1 // 1 33 44
 #define CMD_STOP          2 // 2
 #define CMD_MODE          3
@@ -21,6 +45,7 @@
 #define CMD_GET           5 // 5 4
 #define CMD_EE_READ       6 // 6 0
 #define CMD_EE_WRITE      7 // 7 0 55
+#define CMD_SCAN          8 // 8
 
 #define CMD_SUB_SPEED     1
 #define CMD_SUB_MAX_SPEED 2
@@ -54,7 +79,8 @@
 #define motorPin3L  19     // IN3 on the ULN2003 driver
 #define motorPin4L  23     // IN4 on the ULN2003 driver
 
-// Define the AccelStepper interface type; 4 wire motor in half step mode:
+// Define the AccelStepper interface type; 
+// 4 wire motor in half step mode:
 #define MotorInterfaceType 8
 
 struct Frame {
@@ -93,6 +119,9 @@ void setup() {
   while(Serial.available() > 0) {
     char t = Serial.read();
   }
+  // Ultrasonic
+  pinMode(TRIGGER_PIN, OUTPUT); // Sets the trigPin as an Output
+  pinMode(ECHO_PIN, INPUT); // Sets the echoPin as an Input
 
   // Begin WiFi
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -121,11 +150,11 @@ void setup() {
   // Init EEPROM
   EEPROM.begin(4);  //Initialize EEPROM
   // Set the maximum steps per second:
-  stepperL.setMaxSpeed(1000);
-  stepperR.setMaxSpeed(1000);
+  stepperL.setMaxSpeed(INIT_MAX_SPEED);
+  stepperR.setMaxSpeed(INIT_MAX_SPEED);
   // Set the maximum acceleration in steps per second^2:
-  stepperL.setAcceleration(200);
-  stepperR.setAcceleration(200);
+  stepperL.setAcceleration(INIT_ACCEL);
+  stepperR.setAcceleration(INIT_ACCEL);
 }
 
 void loop() {
@@ -161,6 +190,8 @@ void runCommand(){
     mode = MODE_STB;
   }
   else if(mode == MODE_STB){
+    stepperL.disableOutputs();
+    stepperR.disableOutputs();
   }
 }
 
@@ -213,6 +244,11 @@ void decodeCommand(){
       Serial.println(frame.data[POS_MODE]);
       mode = frame.data[POS_MODE];
       sendUDP("ok\n");
+    }
+    else if(frame.data[POS_COMMAND] == CMD_SCAN){
+      sprintf(response, "Distance: %d mm\n", scan());
+      Serial.println(response);
+      sendUDP(response);
     }
     else if(frame.data[POS_COMMAND] == CMD_EE_READ){
       Serial.print("EEPROM value: ");
@@ -286,4 +322,30 @@ void sendUDP(char * buffer){
   UDP.write((uint8_t*)buffer, strlen(buffer));
   UDP.endPacket();
   Serial.print("UDP: "); Serial.println(buffer);
+}
+
+int scan(){
+  // Clears the trigPin
+  digitalWrite(TRIGGER_PIN, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(TRIGGER_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIGGER_PIN, LOW);
+  
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  //Serial.print("Duration: ");Serial.print(duration);
+  
+  // Calculate the distance
+  long distance = duration * SPEED_SOUND /(1000 * 2);
+  
+  if (distance > SENSOR_MAX_RANGE || distance <= 0){
+    Serial.println("Out of sensor range!");
+    distance = -1;
+  } else {
+    Serial.print("Distance to object: ");Serial.print(distance);
+  }
+  //delay(1000);
+  return (int)distance;
 }

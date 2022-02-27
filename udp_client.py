@@ -13,6 +13,16 @@ port = 4210;
 while(1) :
     try:
         msg = input('Enter command : ')
+        frame = msg.split()
+        if("turn" in frame[0]):
+            msg = "1 "+str(round(float(frame[1])*22.575))+" "+str(round(float(frame[1])*(-22.575)))
+            print(msg)
+            #sys.exit()
+        if("move" in frame[0]):
+            msg = "1 "+str(round(float(frame[1])*21.558*10))+" "+str(round(float(frame[1])*(21.558*10)))
+            print(msg)
+            #sys.exit() 
+         
         
         try :
             #Set the whole string
