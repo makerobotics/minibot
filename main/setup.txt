@@ -1,0 +1,21 @@
+sudo apt-get install python-smbus
+sudo apt-get install i2c-tools
+sudo i2cdetect -y 1
+sudo apt-get install python3-pip
+sudo pip3 install Adafruit-PCA9685
+sudo apt-get install python3-picamera
+sudo apt-get install git
+
+git clone https://github.com/makerobotics/shutdownPi.git
+cd shutdownPi/
+sudo cp shutdownPi.service /etc/systemd/system/
+sudo systemctl enable shutdownPi
+cd ..
+
+sudo apt-get install minicom
+sudo nano /etc/ssh/sshd_config
+sudo pip3 install tornado
+sudo apt-get install libhdf5-103 libhdf5-serial-dev libharfbuzz-dev liblapack-dev libcblas-dev libwebp-dev   libilmbase-dev libopenexr-dev libgstreamer1.0-dev libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev   libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libatlas-base-dev   gfortran libgstreamer1.0-dev libgtk-3-0 -y
+pip3 install opencv-contrib-python-headless
+
+git clone https://github.com/makerobotics/spotmicro.git

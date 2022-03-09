@@ -1,0 +1,1 @@
+RT_data = {} # Real time data

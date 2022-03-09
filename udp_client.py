@@ -7,7 +7,8 @@ except socket.error:
     print('Failed to create socket')
     sys.exit()
 
-host = '192.168.2.164';
+#host = '192.168.2.164';
+host = 'minibot';
 port = 4210;
 
 while(1) :

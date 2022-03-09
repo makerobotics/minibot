@@ -1,0 +1,118 @@
+{
+    "FL": {
+      "knee": {
+        "id": 0,
+        "min_angle_pwm": 650,
+        "max_angle_pwm": 200,
+        "min_angle": 0,
+        "max_angle": 180,
+        "min_pwm": 115,
+        "max_pwm": 660
+      },
+      "shoulder": {
+        "id": 1,
+        "min_angle_pwm": 650,
+        "max_angle_pwm": 100,
+        "min_angle": -90,
+        "max_angle": 90,
+        "min_pwm": 115,
+        "max_pwm": 660
+      },
+      "hip": {
+        "id": 2,
+        "min_angle_pwm": 650,
+        "max_angle_pwm": 170,
+        "min_angle": -90,
+        "max_angle": 90,
+        "min_pwm": 110,
+        "max_pwm": 670
+      }
+    },
+    "RL": {
+        "knee": {
+          "id": 3,
+          "min_angle_pwm": 650,
+          "max_angle_pwm": 100,
+          "min_angle": 0,
+          "max_angle": 180,
+          "min_pwm": 130,
+          "max_pwm": 660
+        },
+        "shoulder": {
+          "id": 4,
+          "min_angle_pwm": 600,
+          "max_angle_pwm": 100,
+          "min_angle": -90,
+          "max_angle": 90,
+          "min_pwm": 110,
+          "max_pwm": 670
+        },
+        "hip": {
+          "id": 5,
+          "min_angle_pwm": 630,
+          "max_angle_pwm": 100,
+          "min_angle": -90,
+          "max_angle": 90,
+          "min_pwm": 150,
+          "max_pwm": 650
+        }
+      },
+      "FR": {
+        "knee": {
+          "id": 6,
+          "min_angle_pwm": 100,
+          "max_angle_pwm": 650,
+          "min_angle": 0,
+          "max_angle": 180,
+          "min_pwm": 100,
+          "max_pwm": 700
+        },
+        "shoulder": {
+          "id": 7,
+          "min_angle_pwm": 100,
+          "max_angle_pwm": 650,
+          "min_angle": -90,
+          "max_angle": 90,
+          "min_pwm": 100,
+          "max_pwm": 700
+        },
+        "hip": {
+          "id": 8,
+          "min_angle_pwm": 200,
+          "max_angle_pwm": 770,
+          "min_angle": -90,
+          "max_angle": 90,
+          "min_pwm": 50,
+          "max_pwm": 980
+        }
+      },
+      "RR": {
+        "knee": {
+          "id": 9,
+          "min_angle_pwm": 100,
+          "max_angle_pwm": 650,
+          "min_angle": 0,
+          "max_angle": 180,
+          "min_pwm": 100,
+          "max_pwm": 700
+        },
+        "shoulder": {
+          "id": 10,
+          "min_angle_pwm": 100,
+          "max_angle_pwm": 650,
+          "min_angle": -90,
+          "max_angle": 90,
+          "min_pwm": 100,
+          "max_pwm": 700
+        },
+        "hip": {
+          "id": 11,
+          "min_angle_pwm": 200,
+          "max_angle_pwm": 820,
+          "min_angle": -90,
+          "max_angle": 90,
+          "min_pwm": 50,
+          "max_pwm": 980
+        }
+      }
+  }
