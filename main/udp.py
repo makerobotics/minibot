@@ -55,8 +55,8 @@ class udp():
                     reply = d[0]
                     addr = d[1]
                     
-                    logger.info('Server reply : ' + reply.decode())
-                    res = reply.decode()
+                    logger.info('Server reply : ' + reply.decode().strip())
+                    res = reply.decode().strip()
                 except socket.timeout:
                     logger.error("UDP Timeout")
                 except socket.error:
