@@ -16,9 +16,9 @@
     <img id="video" width="320"></img>
     <input type="range" min="-100" max="100" value="0" step="1" id="tilt" onchange="javascript:movehead()">
   </div>
-  <div id="robot_view">
+  <!--<div id="robot_view">-->
     <div id="robot">
-      <div><canvas id="CanvasMap"></canvas></div>
+      <div><canvas id="CanvasMap" width="300" height="300"></canvas></div>
     </div>
 <!--
     <div id="leftWheel">
@@ -46,7 +46,7 @@
       <input type="text" id="odo" name="odo" required minlength="4" maxlength="8" size="4">
     </div>
     -->
-  </div>
+  <!--</div>-->
   <!--
   <div class="slidecontainer">
     <fieldset>
@@ -99,5 +99,6 @@
   </div>
 </body>
 <script src="static/minibot.js"></script>
+<script src="static/map.js"></script>
 
 </html>

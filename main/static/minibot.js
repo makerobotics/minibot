@@ -4,6 +4,7 @@ function init() {
     console.log("Init");
     WebSocketControl();
     //setInterval(loop, REFRESH);
+    initCanvas();
 };
 
 function WebSocketControl() {
@@ -30,6 +31,7 @@ function WebSocketControl() {
                 document.getElementById('odo').value = obj.odoDistance;*/
             } catch (e) {
                 document.getElementById('log').innerHTML += 'Rx: '+evt.data+'\n';
+                getObstacle(evt.data);
                 //log('Rx ok.');
                 //document.getElementById("video").src = "data:image/jpeg;base64," + evt.data;
             }
@@ -61,11 +63,13 @@ function clearLog() {
 
 // used by manual command on GUI
 function sendMessage() {
+    const command = document.getElementById('input').value;
     if(ws != null){
-        ws.send(document.getElementById('input').value);
+        ws.send(command);
     }
-    log('Tx: '+document.getElementById('input').value);
+    log('Tx: '+command);
     //document.getElementById('input').value = '';
+    updateMap(command);
 }
 
 function sentCommand(command){
