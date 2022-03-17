@@ -93,8 +93,11 @@
       <legend>Input/Output:</legend>
       <input type="text" id="input" required minlength="4" maxlength="64" size="90">
       <button onclick="javascript:sendMessage();">Send</button>
-      <textarea id="log" name="messages" rows="5" cols="100"></textarea>
-      <button onclick="javascript:clearLog();">Clear log</button>
+      <button onclick="javascript:clearLog();">Clear log</button><br>
+      <button onclick="javascript:importMission();">Import mission</button>
+      <button onclick="javascript:startMission();">Start mission</button><br>
+      <textarea id="log" name="messages" rows="5" cols="50"></textarea>
+      <textarea id="mission" name="mission" rows="5" cols="50"></textarea>
     </fieldset>
   </div>
 </body>

@@ -84,3 +84,17 @@ function calcCommand(leg){
     //log(cmd);
     sentCommand(cmd);
 }
+
+function importMission(){
+    const mission = document.getElementById('mission').value;
+    //const mission = '[{"x": 0, "y": 0}, {"x": 50, "y": 0}, {"x": 50, "y": 50}, {"x": 0, "y": 50}, {"x": 0, "y": 0}]';
+    
+    updateMap(mission);
+}
+
+function startMission(){
+    const mission = document.getElementById('mission').value;
+    if(ws != null){
+        ws.send(mission);
+    }
+}
