@@ -13,7 +13,6 @@ import datetime
 import subprocess
 import configparser
 import sys
-import json
 import data
 import udp
 

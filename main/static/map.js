@@ -135,3 +135,8 @@ function addClickedWaypoint(canvas, event) {
 canv.addEventListener('mousedown', function(e) {
     addClickedWaypoint(canv, e)
 })
+
+function resetMission(){
+    mission = [{x:0, y:0}];
+    refresh();
+}

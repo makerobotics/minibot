@@ -51,6 +51,7 @@ Steps per deg: 8127/360 = 22,575 /deg
 #define CMD_SUB_MAX_SPEED 2
 #define CMD_SUB_ACCEL     3
 #define CMD_SUB_POS       4
+#define CMD_SUB_MOD       5
 
 #define POS_COMMAND       0
 #define POS_SUB_COMMAND   1
@@ -289,7 +290,13 @@ void decodeCommand(){
     }
     else if(frame.data[POS_COMMAND] == CMD_GET){
       if(frame.data[POS_SUB_COMMAND] == CMD_SUB_POS){
-        sprintf(response, "Get positions: PosL=%d PosR=%d\n", stepperL.currentPosition(), stepperR.currentPosition());
+        //sprintf(response, "Get positions: PosL=%d PosR=%d\n", stepperL.currentPosition(), stepperR.currentPosition());
+        sprintf(response, "%d %d\n", stepperL.currentPosition(), stepperR.currentPosition());
+        Serial.println(response);
+        sendUDP(response);
+      }
+      else if(frame.data[POS_SUB_COMMAND] == CMD_SUB_MOD){
+        sprintf(response, "%d\n", mode);
         Serial.println(response);
         sendUDP(response);
       }
