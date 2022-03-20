@@ -112,6 +112,23 @@ int mode = MODE_STB;
 long targetLeft = 0, targetRight = 0;
 long currentLeft = 0, currentRight = 0;
 
+volatile unsigned long pulseInTimeBegin = micros();
+volatile unsigned long pulseInTimeEnd = micros();
+volatile bool newPulseDurationAvailable = false;
+
+void buttonPinInterrupt()
+{
+  if (digitalRead(ECHO_PIN) == HIGH) {
+    // start measuring
+    pulseInTimeBegin = micros();
+  }
+  else {
+    // stop measuring
+    pulseInTimeEnd = micros();
+    newPulseDurationAvailable = true;
+  }
+}
+
 void setup() {
   // Configure serial line
   Serial.begin(115200);
@@ -123,7 +140,8 @@ void setup() {
   // Ultrasonic
   pinMode(TRIGGER_PIN, OUTPUT); // Sets the trigPin as an Output
   pinMode(ECHO_PIN, INPUT); // Sets the echoPin as an Input
-
+  attachInterrupt(digitalPinToInterrupt(ECHO_PIN), buttonPinInterrupt, CHANGE);
+  
   // Begin WiFi
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   
@@ -167,6 +185,24 @@ void loop() {
   decodeCommand();
   // Handle command received before for motion
   runCommand();
+  // Handle US scan interrupts
+  if (newPulseDurationAvailable) {
+    newPulseDurationAvailable = false;
+    unsigned long duration = pulseInTimeEnd - pulseInTimeBegin;
+    Serial.println(duration);
+    // Calculate the distance
+    long distance = duration * SPEED_SOUND /(1000 * 2);
+  
+    if (distance > SENSOR_MAX_RANGE || distance <= 0){
+      Serial.println("Out of sensor range!");
+      distance = -1;
+    } else {
+      Serial.print("Distance to object: ");Serial.print(distance);
+    }
+    sprintf(response, "%d\n", distance);
+    Serial.println(response);
+    sendUDP(response);
+  }
 }
 
 void runCommand(){
@@ -247,9 +283,7 @@ void decodeCommand(){
       sendUDP("ok\n");
     }
     else if(frame.data[POS_COMMAND] == CMD_SCAN){
-      sprintf(response, "Distance: %d mm\n", scan());
-      Serial.println(response);
-      sendUDP(response);
+      triggerScan();
     }
     else if(frame.data[POS_COMMAND] == CMD_EE_READ){
       Serial.print("EEPROM value: ");
@@ -331,6 +365,7 @@ void sendUDP(char * buffer){
   Serial.print("UDP: "); Serial.println(buffer);
 }
 
+/*
 int scan(){
   // Clears the trigPin
   digitalWrite(TRIGGER_PIN, LOW);
@@ -355,4 +390,15 @@ int scan(){
   }
   //delay(1000);
   return (int)distance;
+}
+*/
+
+int triggerScan(){
+  // Clears the trigPin
+  digitalWrite(TRIGGER_PIN, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(TRIGGER_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIGGER_PIN, LOW);
 }
